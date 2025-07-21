@@ -37,6 +37,10 @@ cd property-firecrawl
 ```bash
 pip install -e .
 ```
+for Max
+```bash
+pip3 install -e .
+```
 
 ### 2. Install Dependencies
 
@@ -132,11 +136,21 @@ For TanStack Start or any TypeScript client:
 
 ```typescript
 // Server function to scrape single property
-export async function scrapeZillowProperty(zillowUrl: string) {
+export async function scrapeZillowProperty(
+  address: string,
+  city: string,
+  state: string,
+  zip: string
+) {
   const response = await fetch('https://your-middleware.render.com/api/scrape/zillow', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ zillow_url: zillowUrl })
+    body: JSON.stringify({
+      address,
+      city,
+      state,
+      zip
+    })
   });
   
   if (!response.ok) {

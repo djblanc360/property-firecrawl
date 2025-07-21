@@ -1,4 +1,4 @@
-from firecrawl import FirecrawlApp  # Note: FirecrawlApp, not Firecrawl
+from firecrawl import FirecrawlApp
 from dotenv import load_dotenv
 import os
 import logging
@@ -9,11 +9,12 @@ load_dotenv()
 class ZillowScrapingService:
     def __init__(self):
         self.app = FirecrawlApp(api_key=os.getenv("FIRECRAWL_API_KEY"))
+        print("FIRECRAWL_API_KEY", os.getenv("FIRECRAWL_API_KEY"))
         self.logger = logging.getLogger(__name__)
     
     # https://docs.firecrawl.dev/features/stealth-mode
     async def scrape_zillow_property(self, zillow_url: str) -> Dict[str, Any]:
-        """Scrape Zillow property with automatic stealth fallback"""
+        # Scrape Zillow property with automatic stealth fallback
         
         try:
             # First try with basic scraping
@@ -43,10 +44,12 @@ class ZillowScrapingService:
             
             # Extract property data from the scraped content
             property_data = self._extract_zillow_data(content)
-            
+            final_url = content.get("metadata", {}).get("sourceURL", zillow_url)
+
             return {
                 "success": True,
                 "url": zillow_url,
+                "final_url": final_url,
                 "property_data": property_data,
                 "raw_content": content.get("markdown", "")
             }
@@ -68,10 +71,12 @@ class ZillowScrapingService:
                 )
                 
                 property_data = self._extract_zillow_data(content)
-                
+                final_url = content.get("metadata", {}).get("sourceURL", zillow_url)
+
                 return {
                     "success": True,
                     "url": zillow_url,
+                    "final_url": final_url,
                     "property_data": property_data,
                     "raw_content": content.get("markdown", "")
                 }
@@ -81,16 +86,18 @@ class ZillowScrapingService:
                 raise Exception(f"Both basic and stealth scraping failed: {str(stealth_error)}")
     
     def _extract_zillow_data(self, content: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract structured data from FireCrawl response"""
+        # Extract structured data from FireCrawl response
         markdown = content.get("markdown", "")
-        metadata = content.get("metadata", {})
+        # metadata = content.get("metadata", {})
+        # final_url = content.get("metadata", {}).get("sourceURL", "")
         
         return {
-            "address": metadata.get("title", "").replace(" | Zillow", ""),
+            # "address": metadata.get("title", "").replace(" | Zillow", ""),
             "price": self._extract_price(markdown),
-            "bedrooms": self._extract_bedrooms(markdown),
-            "bathrooms": self._extract_bathrooms(markdown),
-            "square_feet": self._extract_square_feet(markdown),
+            # "bedrooms": self._extract_bedrooms(markdown),
+            # "bathrooms": self._extract_bathrooms(markdown),
+            # "square_feet": self._extract_square_feet(markdown),
+            # "final_url": final_url
         }
     
     # extraction methods...
