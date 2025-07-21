@@ -21,7 +21,7 @@ class ZillowScrapingService:
             response = self.app.scrape_url(
                 zillow_url,
                 formats=["markdown", "html"],
-                onlyMainresponse=True,
+                onlyMainContent=True,
                 waitFor=2000,
                 maxAge=604800000 # 1 week
             )
@@ -34,7 +34,7 @@ class ZillowScrapingService:
                 response = self.app.scrape_url(
                     zillow_url,
                     formats=["markdown", "html"], 
-                    onlyMainresponse=True,
+                    onlyMainContent=True,
                     waitFor=2000,
                     proxy="stealth",  # Enable stealth mode
                     maxAge=604800000 # 1 week
@@ -61,7 +61,7 @@ class ZillowScrapingService:
                 response = self.app.scrape_url(
                     zillow_url,
                     formats=["markdown", "html"],
-                    onlyMainresponse=True, 
+                    onlyMainContent=True, 
                     waitFor=2000,
                     proxy="stealth",
                     maxAge=604800000 # 1 week
@@ -75,7 +75,7 @@ class ZillowScrapingService:
                     "url": zillow_url,
                     "final_url": final_url,
                     "property_data": property_data,
-                    "raw_response": response.get("markdown", "")
+                    "raw_response": response.markdown or ""
                 }
                 
             except Exception as stealth_error:

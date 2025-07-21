@@ -121,6 +121,13 @@ pip install fastapi uvicorn gunicorn httpx python-dotenv firecrawl-py
 # Run with auto-reload
 uvicorn main:app --reload
 
+# restart local server in 1 terminal
+uvicorn main:app --reload --port 8000
+# run in other terminal
+curl -X POST "http://localhost:8000/api/scrape/zillow/url" \
+  -H "Content-Type: application/json" \
+  -d '{"zillow_url": "ZILLOW_ADDRESS_URL"}'
+
 # Test the API
 curl -X POST "http://localhost:8000/api/scrape/zillow" \
   -H "Content-Type: application/json" \
@@ -129,6 +136,7 @@ curl -X POST "http://localhost:8000/api/scrape/zillow" \
 
 ### Testing with Different URLs
 The middleware validates that URLs are Zillow property pages (`zillow.com/homedetails/`) and will return a 400 error for invalid URLs.
+
 
 ### Client-Side Integration (TypeScript)
 
