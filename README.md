@@ -175,6 +175,7 @@ export async function scrapeMultipleProperties(urls: string[]) {
 
 # Todos
 
+* may need to seaerch before crawl: https://docs.firecrawl.dev/api-reference/endpoint/search
 * setup gunicorn before deploying to Render
 * batch scrap multiple properties?
 * add client-side urls
