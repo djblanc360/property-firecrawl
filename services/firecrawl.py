@@ -18,40 +18,38 @@ class ZillowScrapingService:
         
         try:
             # First try with basic scraping
-            content = self.app.scrape_url(
+            response = self.app.scrape_url(
                 zillow_url,
-                params={
-                    "formats": ["markdown", "html"],
-                    "onlyMainContent": True,
-                    "waitFor": 2000
-                }
+                formats=["markdown", "html"],
+                onlyMainresponse=True,
+                waitFor=2000,
+                maxAge=604800000 # 1 week
             )
             
             # Check if error status code
-            status_code = content.get("metadata", {}).get("statusCode")
+            status_code = response.metadata.get("statusCode") if response.metadata else None
             if status_code in [401, 403, 500]:
                 self.logger.info(f"Got status code {status_code}, retrying with stealth proxy")
                 # Retry with stealth proxy
-                content = self.app.scrape_url(
+                response = self.app.scrape_url(
                     zillow_url,
-                    params={
-                        "formats": ["markdown", "html"], 
-                        "onlyMainContent": True,
-                        "waitFor": 2000,
-                        "proxy": "stealth"  # Enable stealth mode
-                    }
+                    formats=["markdown", "html"], 
+                    onlyMainresponse=True,
+                    waitFor=2000,
+                    proxy="stealth",  # Enable stealth mode
+                    maxAge=604800000 # 1 week
                 )
             
-            # Extract property data from the scraped content
-            property_data = self._extract_zillow_data(content)
-            final_url = content.get("metadata", {}).get("sourceURL", zillow_url)
+            # Extract property data from the scraped response
+            property_data = self._extract_zillow_data(response)
+            final_url = response.metadata.get("sourceURL", zillow_url) if response.metadata else zillow_url
 
             return {
                 "success": True,
                 "url": zillow_url,
                 "final_url": final_url,
                 "property_data": property_data,
-                "raw_content": content.get("markdown", "")
+                "raw_response": response.markdown or ""
             }
             
         except Exception as e:
@@ -60,36 +58,34 @@ class ZillowScrapingService:
             # Fallback to stealth proxy on any exception
             try:
                 self.logger.info("Retrying with stealth proxy")
-                content = self.app.scrape_url(
+                response = self.app.scrape_url(
                     zillow_url,
-                    params={
-                        "formats": ["markdown", "html"],
-                        "onlyMainContent": True, 
-                        "waitFor": 2000,
-                        "proxy": "stealth"
-                    }
+                    formats=["markdown", "html"],
+                    onlyMainresponse=True, 
+                    waitFor=2000,
+                    proxy="stealth",
+                    maxAge=604800000 # 1 week
                 )
                 
-                property_data = self._extract_zillow_data(content)
-                final_url = content.get("metadata", {}).get("sourceURL", zillow_url)
+                property_data = self._extract_zillow_data(response)
+                final_url = response.metadata.get("sourceURL", zillow_url) if response.metadata else zillow_url
 
                 return {
                     "success": True,
                     "url": zillow_url,
                     "final_url": final_url,
                     "property_data": property_data,
-                    "raw_content": content.get("markdown", "")
+                    "raw_response": response.get("markdown", "")
                 }
                 
             except Exception as stealth_error:
                 self.logger.error(f"Stealth proxy also failed: {str(stealth_error)}")
                 raise Exception(f"Both basic and stealth scraping failed: {str(stealth_error)}")
     
-    def _extract_zillow_data(self, content: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_zillow_data(self, response) -> Dict[str, Any]:
         # Extract structured data from FireCrawl response
-        markdown = content.get("markdown", "")
-        # metadata = content.get("metadata", {})
-        # final_url = content.get("metadata", {}).get("sourceURL", "")
+        markdown = response.markdown or ""
+        metadata = response.metadata or {}
         
         return {
             # "address": metadata.get("title", "").replace(" | Zillow", ""),

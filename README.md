@@ -1,6 +1,6 @@
 # Property Firecrawl
 
-A Python package for property data web crawling using the Firecrawl API in stealth mode.
+A Python package for property data web crawling using the Firecrawl API in stealth mode and 1 week data for faster crawling.
 
 ## Features
 

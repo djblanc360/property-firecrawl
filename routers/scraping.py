@@ -20,6 +20,9 @@ class ZillowScrapeResponse(BaseModel):
     property_data: dict
     timestamp: str = None
 
+class ZillowBatchRequest(BaseModel):
+    properties: list[ZillowScrapeRequest]
+
 def build_zillow_search_url(address: str, city: str, state: str, zip_code: str) -> str:
     # Format address for URL: replace spaces with hyphens, handle special characters
     formatted_address = address.replace(" ", "-").replace(",", "")
@@ -57,7 +60,7 @@ async def scrape_zillow_property(request: ZillowScrapeRequest):
         raise HTTPException(status_code=500, detail=f"Scraping failed: {str(e)}")
 
 @router.post("/zillow/batch")
-async def scrape_multiple_zillow_properties(urls: list[HttpUrl]):
+async def scrape_multiple_zillow_properties(request: ZillowBatchRequest):
     # Scrape multiple Zillow properties (with rate limiting)
     results = []
     
@@ -93,8 +96,15 @@ async def scrape_multiple_zillow_properties(urls: list[HttpUrl]):
     return {"results": results}
 
 @router.post("/zillow/url")
-async def scrape_zillow_by_url(zillow_url: str):
+async def scrape_zillow_by_url(request: dict):
     # Scrape using a direct Zillow URL (fallback method)
+
+    zillow_url = request.get("zillow_url")
+    if not zillow_url:
+        raise HTTPException(
+            status_code=400, 
+            detail="URL must be a Zillow URL"
+        )
     
     # validate Zillow URL
     if "zillow.com" not in zillow_url:
