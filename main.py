@@ -8,6 +8,8 @@ load_dotenv()
 
 app = FastAPI(title="Property FireCrawl Middleware")
 
+allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Add client-side URL later
@@ -16,6 +18,10 @@ app.add_middleware(
 )
 
 app.include_router(scraping.router, prefix="/api/scrape", tags=["scraping"])
+
+@app.get("/")
+async def root():
+    return {"message": "Property FireCrawl API", "status": "running"}
 
 @app.get("/health")
 async def health_check():
