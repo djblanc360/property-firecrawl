@@ -3,8 +3,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import scraping
 from dotenv import load_dotenv
 import os
+import logging
 
 load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),  # show logs in console
+    ]
+)
+
 
 app = FastAPI(title="Property FireCrawl Middleware")
 
